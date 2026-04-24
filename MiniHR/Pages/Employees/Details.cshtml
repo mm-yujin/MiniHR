@@ -1,0 +1,69 @@
+﻿@page
+@model MiniHR.Pages.Employees.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Employee</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-4">
+            @Html.DisplayNameFor(model => model.Employee.Name)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.Employee.Name)
+        </dd>
+        <dt class="col-sm-4">
+            @Html.DisplayNameFor(model => model.Employee.Department)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.Employee.Department)
+        </dd>
+        <dt class="col-sm-4">
+            @Html.DisplayNameFor(model => model.Employee.HireDate)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.Employee.HireDate)
+        </dd>
+        <dt class="col-sm-4">
+            @Html.DisplayNameFor(model => model.Employee.AnnualSalary)
+        </dt>
+        <dd class="col-sm-8">
+            @Html.DisplayFor(model => model.Employee.AnnualSalary)
+        </dd>
+    </dl>
+        
+    <h4>근태 현황</h4>
+    <hr />
+    @if (Model.TodayAttendance != null)
+    {
+        <dl class="row">
+            <dt class="col-sm-4">금일 출근 시간</dt>
+            <dd class="col-sm-8">@Model.TodayAttendance.CheckInTime.ToString("HH:mm:ss")</dd>
+
+            <dt class="col-sm-4">금일 퇴근 시간</dt>
+            <dd class="col-sm-8">
+                @(Model.TodayAttendance.CheckOutTime?.ToString("HH:mm:ss") ?? "업무 중")
+            </dd>
+        </dl>
+    }
+    else
+    {
+        <p class="text-muted">오늘 등록된 출근 기록이 없습니다.</p>
+    }
+        <dl class="row">
+            <dt class="col-sm-4">이번 달 총 출근 일수</dt>
+            <dd class="col-sm-8">
+                @(Model.TotalAttandanceCount + " 일")
+            </dd>
+        </dl>
+
+</div>
+<div>
+    <a asp-page="./Edit" asp-route-id="@Model.Employee.Id">Edit</a> |
+    <a asp-page="./Index">Back to List</a>
+</div>

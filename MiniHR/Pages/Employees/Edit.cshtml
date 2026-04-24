@@ -1,0 +1,76 @@
+﻿@page
+@model MiniHR.Pages.Employees.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Employee</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Employee.Id" />
+            <div class="form-group">
+                <label asp-for="Employee.Name" class="control-label"></label>
+                <input asp-for="Employee.Name" class="form-control" />
+                <span asp-validation-for="Employee.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Employee.Department" class="control-label"></label>
+                <input asp-for="Employee.Department" class="form-control" />
+                <span asp-validation-for="Employee.Department" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Employee.HireDate" class="control-label"></label>
+                <input asp-for="Employee.HireDate" type="text" id="date-mask" class="form-control" placeholder="yyyy-mm-dd" maxlength="10" />
+                <span asp-validation-for="Employee.HireDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Employee.AnnualSalary" class="control-label"></label>
+                <input asp-for="Employee.AnnualSalary" class="form-control" />
+                <span asp-validation-for="Employee.AnnualSalary" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+        
+    <script>
+        //입사일자 표기 마스크
+        const dateInput = document.getElementById('date-mask');
+
+        dateInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            
+            if (value.length > 4 && value.length <= 6) {
+                value = value.slice(0, 4) + '-' + value.slice(4);
+            } else if (value.length > 6) {
+                value = value.slice(0, 4) + '-' + value.slice(4, 6) + '-' + value.slice(6, 8);
+            }
+
+            e.target.value = value;
+        });
+
+        dateInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Backspace') {
+                const value = e.target.value;
+                if (value.endsWith('-')) {
+                    e.target.value = value.slice(0, -1);
+                }
+            }
+        });
+    </script>
+}
