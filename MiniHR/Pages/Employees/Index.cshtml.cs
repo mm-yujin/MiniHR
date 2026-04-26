@@ -19,40 +19,73 @@ namespace MiniHR.Pages.Employees
         }
 
         public IList<Employee> EmployeeList { get;set; } = default!;
-        public Dictionary<int, Attendance?> AttendanceDict { get; set; } = new Dictionary<int, Attendance?>();
+        public Dictionary<string, Attendance?> AttendanceDict { get; set; } = new Dictionary<string, Attendance?>();
 
         public int TotalCheckedIn { get; set; }
         public int TotalNotCheckedIn { get; set; }
 
+
+        [BindProperty(SupportsGet = true)]
+        public string? SearchString { get; set; } // 검색어
+
+        [BindProperty(SupportsGet = true)]
+        public int CurrentPage { get; set; } = 1; // 현재 페이지
+
+        public int TotalPages { get; set; }
+        public const int PageSize = 10;
+
+
         public async Task OnGetAsync()
         {
-            EmployeeList = await _context.Employees.ToListAsync();
+            var employeeQuery = _context.Employees.AsQueryable();
+
+            if (!string.IsNullOrEmpty(SearchString))
+            {
+                employeeQuery = employeeQuery.Where(s => s.Name.Contains(SearchString)
+                                                      || s.Department.Contains(SearchString));
+            }
+
+            int totalCount = await employeeQuery.CountAsync();
+            TotalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
+
+            EmployeeList = await employeeQuery
+                .AsNoTracking()
+                .OrderBy(e => e.EmployeeNumber)
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync();
 
             var today = DateOnly.FromDateTime(DateTime.Now);
-            var todayAttendances = await _context.Attendances
+
+            //오늘의 전체 Attendances. 페이지랑 상관없이 전체 출근자 확인하는데 필요하므로 미리 이걸 구한다
+            var allTodayAttendances = await _context.Attendances
+                .AsNoTracking()
                 .Where(a => a.WorkDate == today)
                 .ToListAsync();
 
-            AttendanceDict = EmployeeList.ToDictionary(e => e.Id, e => todayAttendances.FirstOrDefault(x => x.EmployeeId == e.EmployeeNumber));
+            AttendanceDict = allTodayAttendances
+                .ToDictionary(a => a.EmployeeNumber, a => (Attendance?)a);
+                        
+            TotalCheckedIn = allTodayAttendances.Count;
 
-            TotalCheckedIn = todayAttendances.DistinctBy(x => x.EmployeeId).Count();
-            TotalNotCheckedIn = EmployeeList.Count - TotalCheckedIn;
+            var totalEmployeeCount = await _context.Employees.CountAsync();
+            TotalNotCheckedIn = totalEmployeeCount - TotalCheckedIn;
         }
 
-        public async Task<IActionResult> OnPostCheckInAsync(string? EmployeeId)
+        public async Task<IActionResult> OnPostCheckInAsync(string? employeeNumber)
         {
-            if (!User.IsInRole(Employee.RoleType.Admin.ToString()) && User.Identity?.Name != EmployeeId)
+            if (!User.IsInRole(Employee.RoleType.Admin.ToString()) && User.Identity?.Name != employeeNumber)
             {
                 return RedirectToPage();
             }
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.EmployeeNumber == EmployeeId);
+            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.EmployeeNumber == employeeNumber);
 
-            if (EmployeeId == null || employee == null) return NotFound();
+            if (employeeNumber == null || employee == null) return NotFound();
 
             var today = DateOnly.FromDateTime(DateTime.Now);
 
-            var attendance = await _context.Attendances.FirstOrDefaultAsync(x => x.EmployeeId == EmployeeId && x.WorkDate == today);
+            var attendance = await _context.Attendances.FirstOrDefaultAsync(x => x.EmployeeNumber == employeeNumber && x.WorkDate == today);
             if (attendance != null) //오늘 출근 기록이 이미 있다면 출근 처리를 무시하고 끝내도록 함
             {
                 return RedirectToPage();
@@ -60,18 +93,18 @@ namespace MiniHR.Pages.Employees
 
             //오늘은 아닌 가장 최근의 출근 기록이 퇴근 처리가 안 되어 있으면, 그거 처리 후 진행.
             var lastLog = await _context.Attendances
-                .Where(x => x.EmployeeId == EmployeeId)
+                .Where(x => x.EmployeeNumber == employeeNumber)
                 .OrderByDescending(x => x.Id)
                 .FirstOrDefaultAsync();
 
             if (lastLog != null && lastLog.CheckOutTime == null)
             {
-                await OnPostCheckOutAsync(EmployeeId);
+                await OnPostCheckOutAsync(employeeNumber);
             }
 
             attendance = new Attendance
             {
-                EmployeeId = EmployeeId,
+                EmployeeNumber = employeeNumber,
                 WorkDate = today,
                 CheckInTime = DateTime.Now
             };
@@ -82,12 +115,12 @@ namespace MiniHR.Pages.Employees
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostCheckOutAsync(string? EmployeeId)
+        public async Task<IActionResult> OnPostCheckOutAsync(string? employeeNumber)
         {
             var today = DateOnly.FromDateTime(DateTime.Now);
 
             var attendance = await _context.Attendances
-                .FirstOrDefaultAsync(a => a.EmployeeId == EmployeeId && a.WorkDate == today && a.CheckOutTime == null);
+                .FirstOrDefaultAsync(a => a.EmployeeNumber == employeeNumber && a.WorkDate == today && a.CheckOutTime == null);
             
             // 기록이 없거나 이미 퇴근 시간이 있다면 무시
             if (attendance == null || attendance.CheckOutTime != null)

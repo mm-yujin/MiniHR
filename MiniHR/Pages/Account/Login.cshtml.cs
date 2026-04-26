@@ -15,10 +15,10 @@ namespace MiniHR.Pages.Account
 
         public LoginModel(AppDbContext context) => _context = context;
 
-        public async Task<IActionResult> OnPostAsync(string EmployeeId, string Password)
+        public async Task<IActionResult> OnPostAsync(string EmployeeNumber, string Password)
         {
             var user = await _context.Employees
-                .FirstOrDefaultAsync(u => u.EmployeeNumber.ToString() == EmployeeId && u.Password == Password); //일단은 평문 비교, 추후 암호화
+                .FirstOrDefaultAsync(u => u.EmployeeNumber.ToString() == EmployeeNumber && u.Password == Password); //일단은 평문 비교, 추후 암호화
 
             if (user == null)
             {

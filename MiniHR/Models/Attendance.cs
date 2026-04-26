@@ -8,8 +8,8 @@ namespace MiniHR.Models
         public int Id { get; set; }
 
         [Required]
-        [ForeignKey("EmployeeId")]
-        public string EmployeeId { get; set; }         //fk
+        [ForeignKey("EmployeeNumber")]
+        public string EmployeeNumber { get; set; }         //fk
 
         public Employee? Employee { get; set; }
         public DateTime CheckInTime { get; set; }

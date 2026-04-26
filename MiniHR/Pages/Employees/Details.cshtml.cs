@@ -19,38 +19,55 @@ namespace MiniHR.Pages.Employees
         }
 
         public Employee Employee { get; set; } = default!;
-        public Attendance TodayAttendance { get; set; } = default!;
+        public IList<Attendance> Attendances { get; set; } = default!;
+        public Attendance? TodayAttendance { get; set; }
+
         public int TotalAttandanceCount = 0;
+
+
+        [BindProperty(SupportsGet = true)]
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public const int PageSize = 10;
 
         public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
-
 
             if (!User.IsInRole(Employee.RoleType.Admin.ToString()) && User.Identity?.Name != id)
             {
                 return Forbid();
             }
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(m => m.EmployeeNumber == id);
-            
-            if (employee == null) return NotFound();
+            var employee = await _context.Employees
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.EmployeeNumber == id);
+
+            if (employee == null)
+                return NotFound();
+
             Employee = employee;
 
             if (_context.Attendances != null)
             {
                 var today = DateOnly.FromDateTime(DateTime.Now);
-                var attendance = await _context.Attendances.FirstOrDefaultAsync(a => a.EmployeeId == id && a.WorkDate == today);
+                TodayAttendance = await _context.Attendances
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(a => a.EmployeeNumber == id && a.WorkDate == today);
 
-                if (attendance != null)
-                    TodayAttendance = attendance;
+                var query = _context.Attendances.Where(x => x.EmployeeNumber == id); //일단은 전체 데이터로하는데 월별 데이터로 하려면 여기에 조건 추가하자.
 
-                var monthStart = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, 1);
-                TotalAttandanceCount = await _context.Attendances
-                    .CountAsync(a => a.EmployeeId == Employee.EmployeeNumber && a.WorkDate >= monthStart);
+                TotalAttandanceCount = await query.CountAsync();
+
+                TotalPages = (int)Math.Ceiling(TotalAttandanceCount / (double)PageSize);
+
+                Attendances = await query
+                    .AsNoTracking()
+                    .OrderByDescending(x => x.WorkDate)
+                    .Skip((CurrentPage - 1) * PageSize) //현재보다 앞의 페이지들은 스킵하고 현재 페이지 것만 가져오도록.
+                    .Take(PageSize)
+                    .ToListAsync();
             }
 
             return Page();

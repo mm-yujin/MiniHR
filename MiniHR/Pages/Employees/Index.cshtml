@@ -11,6 +11,19 @@
             <dt class="col-sm-12">[금일 출근자 : @Model.TotalCheckedIn.ToString() 명 / 미출근 : @Model.TotalNotCheckedIn.ToString() 명]</dt>
         </dl>
 
+<form method="get" class="mb-3">
+    <div class="input-group" style="max-width: 400px;">
+        <input type="text" name="SearchString" value="@Model.SearchString" 
+               class="form-control" placeholder="이름 또는 부서 검색" />
+        <button type="submit" class="btn btn-outline-primary">검색</button>
+        
+        @if (!string.IsNullOrEmpty(Model.SearchString))
+        {
+            <a asp-page="./Index" class="btn btn-outline-secondary">초기화</a>
+        }
+    </div>
+</form>
+
 @if (User.IsInRole(Employee.RoleType.Admin.ToString()))
 {
     <p>
@@ -38,7 +51,7 @@
     </thead>
     <tbody>
 @foreach (var item in Model.EmployeeList) {
-    var todayLog = Model.AttendanceDict.GetValueOrDefault(item.Id);
+    var todayLog = Model.AttendanceDict.GetValueOrDefault(item.EmployeeNumber);
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
@@ -50,7 +63,11 @@
                 @Html.DisplayFor(modelItem => item.HireDate)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.AnnualSalary)
+                @if (User.IsInRole(Employee.RoleType.Admin.ToString()) || 
+                (User.Identity != null && User.Identity.Name == item.EmployeeNumber))
+                {
+                    @Html.DisplayFor(modelItem => item.AnnualSalary)
+                }
             </td>
             <td>
             @if (User.IsInRole(Employee.RoleType.Admin.ToString()) || 
@@ -58,13 +75,13 @@
             {
                 @if (todayLog == null) //출근 전
                 {
-                    <form method="post" asp-page-handler="CheckIn" asp-route-EmployeeId="@item.EmployeeNumber" style="display:inline;">
+                    <form method="post" asp-page-handler="CheckIn" asp-route-employeeNumber="@item.EmployeeNumber" style="display:inline;">
                         <button type="submit" class="btn btn-sm btn-success">출근</button>
                     </form>
                 }
                 else if (todayLog.CheckOutTime == null) //출근 O , 퇴근 전
                 {
-                    <form method="post" asp-page-handler="CheckOut" asp-route-EmployeeId="@item.EmployeeNumber" style="display:inline;">
+                    <form method="post" asp-page-handler="CheckOut" asp-route-employeeNumber="@item.EmployeeNumber" style="display:inline;">
                         <button type="submit" class="btn btn-sm btn-danger">퇴근</button>
                     </form>
                 }
@@ -91,3 +108,17 @@
 }
     </tbody>
 </table>
+
+<nav>
+    <ul class="pagination">
+        @for (var i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                <a asp-page="./Index" 
+                   asp-route-CurrentPage="@i" 
+                   asp-route-SearchString="@Model.SearchString" 
+                   class="page-link">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
