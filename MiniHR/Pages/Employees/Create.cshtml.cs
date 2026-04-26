@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using MiniHR.Models;
 
 namespace MiniHR.Pages.Employees
 {
+    [Authorize(Roles = "Admin")]
     public class CreateModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -18,13 +16,26 @@ namespace MiniHR.Pages.Employees
             _context = context;
         }
 
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnGetAsync()
         {
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            int currentYear = today.Year;
+            int currentMonth = today.Month;
+
+            int thisYearEmployeeCount = await _context.Employees.CountAsync(x => x.HireDate.Year == currentYear);
+            int nextSequnceNumber = thisYearEmployeeCount + 1;
+
+            //사번 예) 24030001
+            string newEmployeeNumber = $"{currentYear.ToString().Substring(2)}{currentMonth.ToString("D2")}{nextSequnceNumber.ToString("D4")}";
+
             Employee = new Employee
             {
                 Department = "0000부",
-                HireDate = DateOnly.FromDateTime(DateTime.Now),
-                AnnualSalary = 0
+                HireDate = today,
+                EmployeeNumber = newEmployeeNumber,
+                AnnualSalary = 0,
+                Role = Employee.RoleType.User,
+                Password = newEmployeeNumber, //초기 비번 = 사번
             };
 
             return Page();

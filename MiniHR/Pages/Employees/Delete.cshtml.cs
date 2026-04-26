@@ -21,14 +21,19 @@ namespace MiniHR.Pages.Employees
         [BindProperty]
         public Employee Employee { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(m => m.Id == id);
+            if (!User.IsInRole(Employee.RoleType.Admin.ToString()) && User.Identity?.Name != id)
+            {
+                return Forbid();
+            }
+
+            var employee = await _context.Employees.FirstOrDefaultAsync(m => m.EmployeeNumber == id);
 
             if (employee == null)
             {
@@ -41,14 +46,14 @@ namespace MiniHR.Pages.Employees
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int? id)
+        public async Task<IActionResult> OnPostAsync(string? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _context.Employees.FirstOrDefaultAsync(m => m.EmployeeNumber == id);
             if (employee != null)
             {
                 Employee = employee;

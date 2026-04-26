@@ -5,8 +5,13 @@ namespace MiniHR.Pages
 {
     public class IndexModel : PageModel
     {
-        public void OnGet()
+        public IActionResult OnGet()
         {
+            if (User.Identity != null && !User.Identity.IsAuthenticated)
+            {
+                return RedirectToPage("/Account/Login");
+            }
+            return Page();
         }
     }
 }

@@ -22,14 +22,20 @@ namespace MiniHR.Pages.Employees
         public Attendance TodayAttendance { get; set; } = default!;
         public int TotalAttandanceCount = 0;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(m => m.Id == id);
+
+            if (!User.IsInRole(Employee.RoleType.Admin.ToString()) && User.Identity?.Name != id)
+            {
+                return Forbid();
+            }
+
+            var employee = await _context.Employees.FirstOrDefaultAsync(m => m.EmployeeNumber == id);
             
             if (employee == null) return NotFound();
             Employee = employee;
@@ -44,7 +50,7 @@ namespace MiniHR.Pages.Employees
 
                 var monthStart = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, 1);
                 TotalAttandanceCount = await _context.Attendances
-                    .CountAsync(a => a.EmployeeId == Employee.Id && a.WorkDate >= monthStart);
+                    .CountAsync(a => a.EmployeeId == Employee.EmployeeNumber && a.WorkDate >= monthStart);
             }
 
             return Page();
