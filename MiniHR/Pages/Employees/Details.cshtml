@@ -36,8 +36,47 @@
             @Html.DisplayFor(model => model.Employee.AnnualSalary)
         </dd>
     </dl>
+    </div>
+
+    <h4>연차 관리 현황</h4>
+    <hr />
+    <div class="row mb-4">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <h5>총 연차</h5>
+                            <p class="display-6 text-primary">@Model.TotalAnnualLeave</p>
+                        </div>
+                        <div class="col-4">
+                            <h5>사용 연차</h5>
+                            <p class="display-6 text-danger">@Model.UsedAnnualLeave</p>
+                        </div>
+                        <div class="col-4">
+                            <h5>잔여 연차</h5>
+                            <p class="display-6 text-success">@Model.RemainingAnnualLeave</p>
+                        </div>
+                    </div>
     
-    
+                    @{
+                        var usagePercent = Model.TotalAnnualLeave > 0 
+                            ? (Model.UsedAnnualLeave / Model.TotalAnnualLeave) * 100 
+                            : 0;
+                    }
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-info" role="progressbar" 
+                             style="width: @(usagePercent)%;" 
+                             aria-valuenow="@usagePercent" aria-valuemin="0" aria-valuemax="100">
+                            @usagePercent.ToString("F1")% 사용됨
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
     <h4>금일의 근태 현황</h4>
     <hr />
     @if (Model.TodayAttendance != null)

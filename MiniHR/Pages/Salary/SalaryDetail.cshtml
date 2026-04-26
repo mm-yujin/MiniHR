@@ -1,0 +1,87 @@
+﻿@page "{empNo}/{yearMonth:int}"
+@model MiniHR.Pages.Salary.SalaryDetailModel
+@{
+    ViewData["Title"] = "급여명세서";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+        <a asp-page="./SalaryCalculate" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> 계산 화면으로 돌아가기
+        </a>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="bi bi-printer"></i> PDF로 저장 / 출력
+        </button>
+    </div>
+
+    <div class="card shadow-sm p-5 border-dark">
+        <h1 class="text-center mb-5 fw-bold">급 여 명 세 서</h1>
+
+        <div class="row mb-4">
+            <div class="col-6">
+                <table class="table table-bordered border-dark">
+                    <tr><th class="table-light w-25">성명</th><td>@Model.SalaryLog.Employee?.Name</td></tr>
+                    <tr><th class="table-light">사번</th><td>@Model.SalaryLog.EmployeeNumber</td></tr>
+                </table>
+            </div>
+            <div class="col-6">
+                <table class="table table-bordered border-dark">
+                    <tr><th class="table-light w-25">부서</th><td>@Model.SalaryLog.Employee?.Department</td></tr>
+                    <tr><th class="table-light">지급일</th><td>@Model.SalaryLog.PaymentDate.ToString("yyyy-MM-dd")</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <h5 class="fw-bold border-bottom border-2 pb-2">[지급 항목]</h5>
+                <table class="table">
+                    <tr><td>기본급</td><td class="text-end">@Model.SalaryLog.BaseSalary.ToString("N0") 원</td></tr>
+                    <tr><td>식대(비과세)</td><td class="text-end">@Model.SalaryLog.MealAllowance.ToString("N0") 원</td></tr>
+                    <tr class="table-light fw-bold">
+                        <td>지급액 계</td><td class="text-end">@((Model.SalaryLog.BaseSalary + Model.SalaryLog.MealAllowance).ToString("N0")) 원</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="col-6">
+                <h5 class="fw-bold border-bottom border-2 pb-2">[공제 항목]</h5>
+                <table class="table">
+                    <tr><td>국민연금</td><td class="text-end">@Model.SalaryLog.NationalPension.ToString("N0") 원</td></tr>
+                    <tr><td>건강보험</td><td class="text-end">@Model.SalaryLog.HealthInsurance.ToString("N0") 원</td></tr>
+                    <tr><td>장기요양보험</td><td class="text-end">@Model.SalaryLog.LongTermCare.ToString("N0") 원</td></tr>
+                    <tr><td>고용보험</td><td class="text-end">@Model.SalaryLog.EmploymentInsurance.ToString("N0") 원</td></tr>
+                    <tr><td>소득세 계(지방세 포함)</td><td class="text-end">@Model.SalaryLog.IncomeTax.ToString("N0") 원</td></tr>
+                    <tr class="table-light fw-bold">
+                        <td>공제액 계</td>
+                        <td class="text-end">
+                            @((Model.SalaryLog.NationalPension + 
+                               Model.SalaryLog.HealthInsurance + 
+                               Model.SalaryLog.LongTermCare + 
+                               Model.SalaryLog.EmploymentInsurance + 
+                               Model.SalaryLog.IncomeTax).ToString("N0")) 원
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-5 p-4 bg-light border text-center">
+            <h4 class="mb-0 fw-bold">실수령액: @Model.SalaryLog.NetPay.ToString("N0") 원</h4>
+        </div>
+
+        <div class="text-end mt-5">
+            <p class="h5">2026년 @Model.SalaryLog.PaymentDate.Month 월 @Model.SalaryLog.PaymentDate.Day 일</p>
+            <p class="h4 fw-bold">귀하의 노고에 감사드립니다.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 인쇄 시 버튼 숨기기 */
+    @@media print {
+        .d-print-none { display: none !important; }
+        .card { border: none !important; shadow: none !important; }
+        body { background-color: white !important; }
+    }
+</style>

@@ -30,6 +30,11 @@ namespace MiniHR.Pages.Employees
         public int TotalPages { get; set; }
         public const int PageSize = 10;
 
+        
+        public decimal TotalAnnualLeave { get; set; }
+        public decimal UsedAnnualLeave { get; set; }
+        public decimal RemainingAnnualLeave => TotalAnnualLeave - UsedAnnualLeave;
+
         public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
@@ -48,6 +53,13 @@ namespace MiniHR.Pages.Employees
                 return NotFound();
 
             Employee = employee;
+
+            TotalAnnualLeave = Employee.GetTotalAnnualLeave(DateTime.Today);
+
+            UsedAnnualLeave = await _context.LeaveLogs
+                .AsNoTracking()
+                .Where(l => l.EmployeeNumber == id)
+                .SumAsync(l => l.UsedDays);
 
             if (_context.Attendances != null)
             {

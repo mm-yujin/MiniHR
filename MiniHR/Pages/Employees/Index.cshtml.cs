@@ -34,6 +34,8 @@ namespace MiniHR.Pages.Employees
         public int TotalPages { get; set; }
         public const int PageSize = 10;
 
+        public Dictionary<string, decimal> LeaveUsageDict { get; set; } = new Dictionary<string, decimal>();
+
 
         public async Task OnGetAsync()
         {
@@ -54,6 +56,18 @@ namespace MiniHR.Pages.Employees
                 .Skip((CurrentPage - 1) * PageSize)
                 .Take(PageSize)
                 .ToListAsync();
+
+            var employeeIds = EmployeeList.Select(e => e.EmployeeNumber).ToList();
+
+            LeaveUsageDict = await _context.LeaveLogs
+                .AsNoTracking()
+                .Where(l => employeeIds.Contains(l.EmployeeNumber))
+                .GroupBy(l => l.EmployeeNumber)
+                .Select(g => new {
+                    EmployeeNumber = g.Key,
+                    UsedDays = g.Sum(x => x.UsedDays)
+                })
+                .ToDictionaryAsync(x => x.EmployeeNumber, x => x.UsedDays);
 
             var today = DateOnly.FromDateTime(DateTime.Now);
 

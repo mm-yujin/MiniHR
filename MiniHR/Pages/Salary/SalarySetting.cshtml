@@ -1,0 +1,120 @@
+﻿@page
+@model MiniHR.Pages.Salary.SalarySettingModel
+@{
+    ViewData["Title"] = "급여 설정 관리";
+}
+
+<div class="container mt-4" style="max-width: 800px;">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0"><i class="bi bi-gear-fill"></i> @Model.Setting.Year 년도 급여 및 보험 요율 설정</h3>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <input type="hidden" asp-for="Setting.Id" />
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Setting.Year" class="form-label fw-bold">적용 년도</label>
+                        <input asp-for="Setting.Year" class="form-control" placeholder="예: 2026" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Setting.MealAllowanceLimit" class="form-label fw-bold">식대 비과세 한도</label>
+                        <div class="input-group">
+                            <input asp-for="Setting.MealAllowanceLimit" class="form-control text-end" type="number" />
+                            <span class="input-group-text">원</span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+                    <h5 class="text-secondary"><i class="bi bi-calculator"></i> 4대 보험 요율 설정</h5>
+
+                    <div class="col-md-6">
+                        <label asp-for="Setting.NationalPensionRate" class="form-label">국민연금 요율 (근로자&사업주 각 부담분)</label>
+                        <div class="input-group">
+                            <input asp-for="Setting.NationalPensionRate" class="form-control text-end" step="0.0001" 
+                            value="@Model.Setting.NationalPensionRate.ToString("G")"/>
+                        </div>
+                        <div class="form-text">기준: 0.045 (4.5%)</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Setting.HealthInsuranceRate" class="form-label">건강보험 요율 (근로자&사업주 각 부담분)</label>
+                        <div class="input-group">
+                            <input asp-for="Setting.HealthInsuranceRate" class="form-control text-end" step="0.00001" 
+                            value="@Model.Setting.HealthInsuranceRate.ToString("G")"/>                            
+                        </div>
+                        <div class="form-text">기준: 0.03545 (3.545%)</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Setting.LongTermCareRate" class="form-label">장기요양보험 요율 (근로자&사업주 각 부담분)</label>
+                        <div class="input-group">
+                            <input asp-for="Setting.LongTermCareRate" class="form-control text-end" step="0.0001" 
+                            value="@Model.Setting.LongTermCareRate.ToString("G")"/>
+                        </div>
+                        <div class="form-text">건보료 대비 비율 (기준: 0.1295)</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Setting.EmploymentInsuranceRate" class="form-label">고용보험 요율(근로자 부담분)</label>
+                        <div class="input-group">
+                            <input asp-for="Setting.EmploymentInsuranceRate" class="form-control text-end" step="0.001" 
+                            value="@Model.Setting.EmploymentInsuranceRate.ToString("G")"/>
+                        </div>
+                        <div class="form-text">기준: 0.009 (0.9%)</div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Setting.CompanyEmploymentInsuranceRate" class="form-label">고용보험 요율(사업주 부담분)</label>
+                    <div class="input-group">
+                        <input asp-for="Setting.CompanyEmploymentInsuranceRate" class="form-control text-end" step="0.0001" 
+                               value="@Model.Setting.CompanyEmploymentInsuranceRate.ToString("G")"/>
+                    </div>
+                    <div class="form-text">일반: 0.0115 (1.15%)</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Setting.IndustrialAccidentInsuranceRate" class="form-label">산재보험 요율(사업주 부담분)</label>
+                    <div class="input-group">
+                        <input asp-for="Setting.IndustrialAccidentInsuranceRate" class="form-control text-end" step="0.0001" 
+                               value="@Model.Setting.IndustrialAccidentInsuranceRate.ToString("G")"/>
+                    </div>
+                    <div class="form-text">업종별 상이 (예: 0.007)</div>
+                </div>
+
+             <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="Setting.BasicDeduction" class="form-label">기본 인적공제</label>
+                    <input asp-for="Setting.BasicDeduction" class="form-control text-end" type="number" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Setting.AdditionalDeduction" class="form-label">기타 일괄공제</label>
+                    <input asp-for="Setting.AdditionalDeduction" class="form-control text-end" type="number" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Setting.StandardTaxCredit" class="form-label">연간 세액공제</label>
+                    <input asp-for="Setting.StandardTaxCredit" class="form-control text-end" type="number" />
+                </div>
+            </div>
+
+                <div class="mt-5 d-flex justify-content-between">
+                    <div>
+                        <a asp-page="/Index" class="btn btn-outline-secondary">메인으로</a>
+                        <a asp-page="./SalaryCalculate" class="btn btn-outline-info">계산 화면으로</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary px-5">설정 저장하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-3 small text-muted">
+        <ul>
+            <li>요율은 소수점 형태(예: 4.5% -> 0.045)로 입력해 주세요.</li>
+            <li>저장된 설정은 실시간으로 전체 급여 계산 로직에 반영됩니다.</li>
+        </ul>
+    </div>
+</div>

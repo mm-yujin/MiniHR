@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MiniHR.Models;
 
@@ -11,9 +12,11 @@ using MiniHR.Models;
 namespace MiniHR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260426103139_AddBrackets")]
+    partial class AddBrackets
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -292,7 +295,22 @@ namespace MiniHR.Migrations
                     b.Property<decimal>("NationalPensionRate")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("ProgressiveDeduction2")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("StandardTaxCredit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TaxBracket1")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TaxBracket2")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TaxRate1")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TaxRate2")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Year")

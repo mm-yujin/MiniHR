@@ -31,81 +31,92 @@
     </p>
 }
 
-<table class="table">
+<table class="table table-hover">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.EmployeeList[0].Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EmployeeList[0].Department)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EmployeeList[0].HireDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EmployeeList[0].AnnualSalary)
-            </th>
-            <th></th>
+            <th>@Html.DisplayNameFor(model => model.EmployeeList[0].Name)</th>
+            <th>@Html.DisplayNameFor(model => model.EmployeeList[0].Department)</th>
+            <th>@Html.DisplayNameFor(model => model.EmployeeList[0].HireDate)</th>
+            <th>연차 현황 (잔여/총)</th> <th>@Html.DisplayNameFor(model => model.EmployeeList[0].AnnualSalary)</th>
+            <th>근태</th>
+            <th>관리</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.EmployeeList) {
-    var todayLog = Model.AttendanceDict.GetValueOrDefault(item.EmployeeNumber);
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Department)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.HireDate)
-            </td>
-            <td>
-                @if (User.IsInRole(Employee.RoleType.Admin.ToString()) || 
-                (User.Identity != null && User.Identity.Name == item.EmployeeNumber))
-                {
-                    @Html.DisplayFor(modelItem => item.AnnualSalary)
-                }
-            </td>
-            <td>
-            @if (User.IsInRole(Employee.RoleType.Admin.ToString()) || 
-                (User.Identity != null && User.Identity.Name == item.EmployeeNumber))
-            {
-                @if (todayLog == null) //출근 전
-                {
-                    <form method="post" asp-page-handler="CheckIn" asp-route-employeeNumber="@item.EmployeeNumber" style="display:inline;">
-                        <button type="submit" class="btn btn-sm btn-success">출근</button>
-                    </form>
-                }
-                else if (todayLog.CheckOutTime == null) //출근 O , 퇴근 전
-                {
-                    <form method="post" asp-page-handler="CheckOut" asp-route-employeeNumber="@item.EmployeeNumber" style="display:inline;">
-                        <button type="submit" class="btn btn-sm btn-danger">퇴근</button>
-                    </form>
-                }
-                else
-                {
-                    <span class="badge bg-secondary">업무 종료(퇴근 완료)</span>
-                }
-            }
-            </td>
-            <td>
-            @if (User.IsInRole(Employee.RoleType.Admin.ToString())) 
-            {
-                <a asp-page="./Edit" asp-route-id="@item.EmployeeNumber">수정(관리자)</a> @:|
-                <a asp-page="./Details" asp-route-id="@item.EmployeeNumber">세부 정보</a> @:|
-                <a asp-page="./Delete" asp-route-id="@item.EmployeeNumber">데이터 삭제</a>
-            }
-            else if (User.Identity != null && User.Identity.Name == item.EmployeeNumber) 
-            {
-                <a asp-page="./Edit" asp-route-id="@item.EmployeeNumber">내 정보 수정</a> @:|
-                <a asp-page="./Details" asp-route-id="@item.EmployeeNumber">세부 정보</a>
-            }
-            </td>
-        </tr>
-}
+        @foreach (var item in Model.EmployeeList)
+        {
+            var todayLog = Model.AttendanceDict.GetValueOrDefault(item.EmployeeNumber);
+            
+            var usedLeave = Model.LeaveUsageDict.GetValueOrDefault(item.EmployeeNumber, 0m);
+            var totalLeave = item.GetTotalAnnualLeave(DateTime.Today);
+            var remainingLeave = totalLeave - usedLeave;
+
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.Department)</td>
+                <td>@item.HireDate.ToString("yyyy-MM-dd")</td>
+                
+                <td>
+                    @if (User.IsInRole(Employee.RoleType.Admin.ToString()) || (User.Identity?.Name == item.EmployeeNumber))
+                    {
+                    <span class="badge @(remainingLeave > 0 ? "bg-primary" : "bg-danger")">
+                        @remainingLeave / @totalLeave
+                    </span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">비공개</span>
+                    }
+                </td>
+
+                <td>
+                    @if (User.IsInRole(Employee.RoleType.Admin.ToString()) || (User.Identity?.Name == item.EmployeeNumber))
+                    {
+                        @item.AnnualSalary.ToString("N0") @:원
+                    }
+                    else
+                    {
+                        <span class="text-muted">비공개</span>
+                    }
+                </td>
+
+                <td>
+                    @if (User.IsInRole(Employee.RoleType.Admin.ToString()) || (User.Identity?.Name == item.EmployeeNumber))
+                    {
+                        @if (todayLog == null)
+                        {
+                            <form method="post" asp-page-handler="CheckIn" asp-route-employeeNumber="@item.EmployeeNumber" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-success">출근</button>
+                            </form>
+                        }
+                        else if (todayLog.CheckOutTime == null)
+                        {
+                            <form method="post" asp-page-handler="CheckOut" asp-route-employeeNumber="@item.EmployeeNumber" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger">퇴근</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">퇴근 완료</span>
+                        }
+                    }
+                </td>
+
+                <td>
+                    @if (User.IsInRole(Employee.RoleType.Admin.ToString()))
+                    {
+                        <a asp-page="./Edit" asp-route-id="@item.EmployeeNumber" class="btn btn-sm btn-outline-secondary">수정</a>
+                        <a asp-page="./Details" asp-route-id="@item.EmployeeNumber" class="btn btn-sm btn-outline-info">정보</a>
+                        <a asp-page="./Delete" asp-route-id="@item.EmployeeNumber" class="btn btn-sm btn-outline-danger">삭제</a>
+                    }
+                    else if (User.Identity?.Name == item.EmployeeNumber)
+                    {
+                        <a asp-page="./Edit" asp-route-id="@item.EmployeeNumber" class="btn btn-sm btn-outline-secondary">내 정보 수정</a>
+                        <a asp-page="./Details" asp-route-id="@item.EmployeeNumber" class="btn btn-sm btn-outline-info">세부 정보</a>
+                    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 

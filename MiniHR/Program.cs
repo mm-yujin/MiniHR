@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using MiniHR.Models;
+using MiniHR.Services;
 
 
 
@@ -24,6 +25,8 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AllowAnonymousToPage("/Account/Login");
     options.Conventions.AllowAnonymousToPage("/Account/Logout");
 });
+
+builder.Services.AddScoped<SalaryService>();
 
 var app = builder.Build();
 

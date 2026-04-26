@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MiniHR.Models;
 
@@ -11,9 +12,11 @@ using MiniHR.Models;
 namespace MiniHR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260426093521_SalaryLogTableFix")]
+    partial class SalaryLogTableFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,28 +51,6 @@ namespace MiniHR.Migrations
                     b.HasIndex("EmployeeNumber");
 
                     b.ToTable("Attendances");
-                });
-
-            modelBuilder.Entity("MiniHR.Models.DeductionBracket", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("BaseDeduction")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TaxRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Threshold")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DeductionBrackets");
                 });
 
             modelBuilder.Entity("MiniHR.Models.Employee", b =>
@@ -204,35 +185,14 @@ namespace MiniHR.Migrations
                     b.Property<decimal>("BaseSalary")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("CompanyEmploymentInsurance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("CompanyHealthInsurance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("CompanyLongTermCare")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("CompanyNationalPension")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("EmployeeNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("EmploymentInsurance")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("HealthInsurance")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("IncomeTax")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("IndustrialAccidentInsurance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("LongTermCare")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("MealAllowance")
@@ -262,25 +222,13 @@ namespace MiniHR.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("AdditionalDeduction")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("BasicDeduction")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("CompanyEmploymentInsuranceRate")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("EmploymentInsuranceRate")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("HealthInsuranceRate")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("IncomeTaxRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("IndustrialAccidentInsuranceRate")
+                    b.Property<decimal>("IncomeTax")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("LongTermCareRate")
@@ -292,7 +240,10 @@ namespace MiniHR.Migrations
                     b.Property<decimal>("NationalPensionRate")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("StandardTaxCredit")
+                    b.Property<decimal>("TaxBracket1")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TaxRate1")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Year")
@@ -302,28 +253,6 @@ namespace MiniHR.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SalarySettings");
-                });
-
-            modelBuilder.Entity("MiniHR.Models.TaxBracket", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("ProgressiveDeduction")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TaxRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Threshold")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TaxBrackets");
                 });
 
             modelBuilder.Entity("MiniHR.Models.Attendance", b =>
