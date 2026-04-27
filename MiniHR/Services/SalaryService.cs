@@ -37,7 +37,7 @@ namespace MiniHR.Services
                 // 급여는 인당 계산을 원칙으로 해야 하므로 반복문 돌린다.
                 foreach (var emp in targets)
                 {
-                    var log = await CalculateMonthlySalaryAsync(emp.EmployeeNumber, emp.AnnualSalary, yearMonth, setting);
+                    var log = await CalculateMonthlySalaryAsync(emp, yearMonth, setting);
                     newLogs.Add(log);
                 }
 
@@ -60,10 +60,35 @@ namespace MiniHR.Services
             }
         }
 
-        private async Task<SalaryLog> CalculateMonthlySalaryAsync(string empNo, decimal annualSalary, int yearMonth, SalarySetting setting)
+        private async Task<SalaryLog> CalculateMonthlySalaryAsync(Employee employee, int yearMonth, SalarySetting setting)
         {
-            decimal monthlyTotal = Math.Floor(annualSalary / 12);
-            decimal mealAllowance = monthlyTotal >= setting.MealAllowanceLimit ? setting.MealAllowanceLimit : monthlyTotal;
+            int year = yearMonth / 100;
+            int month = yearMonth % 100;
+            var monthStart = new DateOnly(year, month, 1);
+            var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+            int totalDaysInMonth = monthEnd.Day;
+            var hireDate = employee.HireDate;
+
+            decimal ratio = 1.0m;
+
+            // 해당 월에 입사한 경우- 일할 계산
+            if (hireDate > monthStart && hireDate <= monthEnd)
+            {
+                // 근무일수 = 종료일 - 입사일 + 1
+                int workDays = monthEnd.Day - hireDate.Day + 1;
+                ratio = (decimal)workDays / totalDaysInMonth;
+            }
+            else if (hireDate > monthEnd)
+            {
+                ratio = 0;
+            }
+
+            decimal fullMonthlyTotal = Math.Floor(employee.AnnualSalary / 12);
+            decimal monthlyTotal = Math.Floor(fullMonthlyTotal * ratio); 
+
+            decimal fullMealAllowance = fullMonthlyTotal >= setting.MealAllowanceLimit ? setting.MealAllowanceLimit : fullMonthlyTotal;
+            decimal mealAllowance = Math.Floor(fullMealAllowance * ratio);
+
             decimal taxableSalary = monthlyTotal - mealAllowance;
 
             decimal nationalPension = Math.Floor((taxableSalary * setting.NationalPensionRate) / 10) * 10;
@@ -80,7 +105,7 @@ namespace MiniHR.Services
 
             return new SalaryLog
             {
-                EmployeeNumber = empNo,
+                EmployeeNumber = employee.EmployeeNumber,
                 YearMonth = yearMonth,
                 PaymentDate = DateTime.Today,
                 BaseSalary = taxableSalary,
