@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MiniHR.Models;
 
@@ -11,9 +12,11 @@ using MiniHR.Models;
 namespace MiniHR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260427022810_EmployeeNumberUniqueKeySetting")]
+    partial class EmployeeNumberUniqueKeySetting
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -272,28 +275,28 @@ namespace MiniHR.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("CompanyEmploymentInsuranceRate")
-                        .HasColumnType("decimal(18, 4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("EmploymentInsuranceRate")
-                        .HasColumnType("decimal(18, 4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("HealthInsuranceRate")
-                        .HasColumnType("decimal(18, 5)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("IncomeTaxRate")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("IndustrialAccidentInsuranceRate")
-                        .HasColumnType("decimal(18, 4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("LongTermCareRate")
-                        .HasColumnType("decimal(18, 4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("MealAllowanceLimit")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("NationalPensionRate")
-                        .HasColumnType("decimal(18, 4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("StandardTaxCredit")
                         .HasColumnType("decimal(18,2)");

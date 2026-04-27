@@ -27,7 +27,8 @@
             </div>
             <div class="form-group">
                 <label asp-for="Employee.HireDate" class="control-label"></label>
-                <input asp-for="Employee.HireDate" type="text" id="date-mask" class="form-control" placeholder="yyyy-mm-dd" maxlength="10" />
+                <input asp-for="Employee.HireDate" type="text" id="date-mask" class="form-control" placeholder="yyyy-mm-dd" maxlength="10" 
+                value="@Model.Employee.HireDate.ToString("yyyy-MM-dd")"/>
                 <span asp-validation-for="Employee.HireDate" class="text-danger"></span>
                 <p class="mb-2">
             </div>
@@ -49,6 +50,8 @@
                 <input type="submit" value="Create" class="btn btn-primary" />
                 <p class="mb-2">
             </div>
+            <input type="hidden" asp-for="Employee.EmployeeNumber" />
+            <input type="hidden" asp-for="Employee.Password" />
         </form>
     </div>
 </div>

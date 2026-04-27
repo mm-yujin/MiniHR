@@ -7,6 +7,10 @@ using MiniHR.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var cultureInfo = new System.Globalization.CultureInfo("ko-KR");
+System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options => {
         options.LoginPath = "/Account/Login"; // 로그인 안 됐을 때 보낼 페이지

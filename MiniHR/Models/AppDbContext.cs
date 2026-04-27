@@ -24,6 +24,10 @@ namespace MiniHR.Models
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Employee>()
+                .HasIndex(e => e.EmployeeNumber)
+                .IsUnique();
+
             modelBuilder.Entity<Attendance>()
                 .HasOne(a => a.Employee)                    // Attendance는 하나의 Employee를 가짐
                 .WithMany()                                 // Employee는 여러 Attendance를 가질 수 있음
@@ -41,6 +45,16 @@ namespace MiniHR.Models
                 .WithMany()                     
                 .HasForeignKey(s => s.EmployeeNumber)
                 .HasPrincipalKey(e => e.EmployeeNumber);
+
+            modelBuilder.Entity<SalarySetting>(entity =>
+            {
+                entity.Property(e => e.EmploymentInsuranceRate).HasColumnType("decimal(18, 4)");
+                entity.Property(e => e.HealthInsuranceRate).HasColumnType("decimal(18, 5)");
+                entity.Property(e => e.LongTermCareRate).HasColumnType("decimal(18, 4)");
+                entity.Property(e => e.NationalPensionRate).HasColumnType("decimal(18, 4)");
+                entity.Property(e => e.CompanyEmploymentInsuranceRate).HasColumnType("decimal(18, 4)");
+                entity.Property(e => e.IndustrialAccidentInsuranceRate).HasColumnType("decimal(18, 4)");
+            });
         }
     }
 }

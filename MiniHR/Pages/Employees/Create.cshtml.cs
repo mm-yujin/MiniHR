@@ -16,39 +16,52 @@ namespace MiniHR.Pages.Employees
             _context = context;
         }
 
+        [BindProperty]
+        public Employee Employee { get; set; } = default!;
+
         public async Task<IActionResult> OnGetAsync()
         {
             var today = DateOnly.FromDateTime(DateTime.Now);
-            int currentYear = today.Year;
-            int currentMonth = today.Month;
-
-            int thisYearEmployeeCount = await _context.Employees.CountAsync(x => x.HireDate.Year == currentYear);
-            int nextSequnceNumber = thisYearEmployeeCount + 1;
-
-            //사번 예) 24030001
-            string newEmployeeNumber = $"{currentYear.ToString().Substring(2)}{currentMonth.ToString("D2")}{nextSequnceNumber.ToString("D4")}";
 
             Employee = new Employee
             {
                 Department = "0000부",
                 HireDate = today,
-                EmployeeNumber = newEmployeeNumber,
                 AnnualSalary = 0,
                 Role = Employee.RoleType.User,
-                Password = newEmployeeNumber, //초기 비번 = 사번
             };
 
             return Page();
         }
 
-        [BindProperty]
-        public Employee Employee { get; set; } = default!;
-
-        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            ModelState.Remove("Employee.EmployeeNumber");
+            ModelState.Remove("Employee.Password");
+
             if (!ModelState.IsValid)
             {
+                return Page();
+            }
+
+            var hireDate = Employee.HireDate;
+
+            int realYear = hireDate.Year;
+            int realMonth = hireDate.Month;
+
+            int thisYearEmployeeCount = await _context.Employees.CountAsync(x => x.HireDate.Year == realYear);
+            int nextSequnceNumber = thisYearEmployeeCount + 1;
+
+            Employee.EmployeeNumber = $"{realYear.ToString().Substring(2)}{realMonth.ToString("D2")}{nextSequnceNumber.ToString("D4")}";
+            Employee.Password = Employee.EmployeeNumber;
+
+            if (Employee.EmployeeNumber == null ||  Employee.EmployeeNumber.Length == 0)
+                return Page();
+
+            bool isDuplicate = await _context.Employees.AnyAsync(e => e.EmployeeNumber == Employee.EmployeeNumber);
+            if (isDuplicate)
+            {
+                ModelState.AddModelError("Employee.EmployeeNumber", "이미 존재하는 사번입니다. 잠시 후 다시 시도해주세요.");
                 return Page();
             }
 

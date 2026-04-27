@@ -38,6 +38,7 @@ namespace MiniHR.Pages.Salary
             CompletedSalaryLogs = await _context.SalaryLogs
                 .Include(s => s.Employee)
                 .Where(s => s.YearMonth == currentYearMonth)
+                .OrderBy(s  => s.EmployeeNumber)
                 .ToListAsync();
         }
 

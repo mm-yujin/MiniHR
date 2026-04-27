@@ -22,7 +22,7 @@ namespace MiniHR.Pages.Employees
         public Dictionary<string, Attendance?> AttendanceDict { get; set; } = new Dictionary<string, Attendance?>();
 
         public int TotalCheckedIn { get; set; }
-        public int TotalNotCheckedIn { get; set; }
+        public int TotalCount { get; set; }
 
 
         [BindProperty(SupportsGet = true)]
@@ -83,7 +83,7 @@ namespace MiniHR.Pages.Employees
             TotalCheckedIn = allTodayAttendances.Count;
 
             var totalEmployeeCount = await _context.Employees.CountAsync();
-            TotalNotCheckedIn = totalEmployeeCount - TotalCheckedIn;
+            TotalCount = totalEmployeeCount;
         }
 
         public async Task<IActionResult> OnPostCheckInAsync(string? employeeNumber)
@@ -113,7 +113,8 @@ namespace MiniHR.Pages.Employees
 
             if (lastLog != null && lastLog.CheckOutTime == null)
             {
-                await OnPostCheckOutAsync(employeeNumber);
+                lastLog.CheckOutTime = lastLog.WorkDate.ToDateTime(new TimeOnly(23, 59, 59));
+                _context.Update(lastLog);
             }
 
             attendance = new Attendance
@@ -134,8 +135,10 @@ namespace MiniHR.Pages.Employees
             var today = DateOnly.FromDateTime(DateTime.Now);
 
             var attendance = await _context.Attendances
-                .FirstOrDefaultAsync(a => a.EmployeeNumber == employeeNumber && a.WorkDate == today && a.CheckOutTime == null);
-            
+                .Where(a => a.EmployeeNumber == employeeNumber && a.CheckOutTime == null)
+                .OrderByDescending(a => a.WorkDate)
+                .FirstOrDefaultAsync();
+
             // 기록이 없거나 이미 퇴근 시간이 있다면 무시
             if (attendance == null || attendance.CheckOutTime != null)
             {
