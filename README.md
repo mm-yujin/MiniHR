@@ -5,8 +5,7 @@
 ---
 
 ## 🔗 라이브 데모
-
-> **[Demo Link]** *(배포 후 링크 추가 예정)*
+[라이브 데모 페이지 바로가기(링크)](https://minihr-web-hdhsength7cjhrey.koreacentral-01.azurewebsites.net/)
 
 | 계정 | 사번 | 비밀번호 | 권한 |
 |------|------|----------|------|
