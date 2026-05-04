@@ -1,0 +1,55 @@
+﻿@page
+@model MiniHR.Pages.Leave.MyLeaveModel
+@{
+    ViewData["Title"] = "내 연차 내역";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>내 연차 내역</h2>
+    <a asp-page="./Apply" class="btn btn-primary">연차 신청하기</a>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-warning">@TempData["Error"]</div>
+}
+
+<div class="mb-3">
+    <span class="badge bg-primary fs-6">총 @Model.TotalLeave 일</span>
+    <span class="badge bg-danger fs-6 ms-2">사용 @Model.UsedLeave 일</span>
+    <span class="badge bg-success fs-6 ms-2">잔여 @Model.RemainingLeave 일</span>
+</div>
+
+<table class="table table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>날짜</th>
+            <th>구분</th>
+            <th>차감</th>
+            <th>사유</th>
+            <th>신청일시</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.LeaveLogs)
+        {
+            <tr>
+                <td>@item.LeaveDate.ToString("yyyy-MM-dd")</td>
+                <td>@item.Type</td>
+                <td>@item.UsedDays 일</td>
+                <td>@(item.Reason ?? "-")</td>
+                <td>@item.CreatedAt.ToString("MM-dd HH:mm")</td>
+                <td>
+                    @if (item.LeaveDate >= DateOnly.FromDateTime(DateTime.Today))
+                    {
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id"
+                              onsubmit="return confirm('신청을 취소하시겠습니까?')">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">취소</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

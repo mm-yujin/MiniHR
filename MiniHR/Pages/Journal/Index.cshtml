@@ -1,0 +1,49 @@
+﻿@page
+@model MiniHR.Pages.Journal.IndexModel
+@{
+    ViewData["Title"] = "전표 목록";
+}
+
+<h2>전표 목록</h2>
+
+@foreach (var entry in Model.JournalEntries)
+{
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+            <span class="fw-bold">@entry.TransactionDate.ToString("yyyy-MM-dd")</span>
+            <span class="text-muted">@entry.Description</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-sm mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>계정 과목</th>
+                        <th class="text-end">차변</th>
+                        <th class="text-end">대변</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var detail in entry.Details)
+                    {
+                        <tr>
+                            <td>@detail.AccountName</td>
+                            <td class="text-end">
+                                @(detail.Debit > 0 ? detail.Debit.ToString("N0") + " 원" : "-")
+                            </td>
+                            <td class="text-end">
+                                @(detail.Credit > 0 ? detail.Credit.ToString("N0") + " 원" : "-")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-secondary fw-bold">
+                    <tr>
+                        <td>합계</td>
+                        <td class="text-end">@entry.Details.Sum(d => d.Debit).ToString("N0") 원</td>
+                        <td class="text-end">@entry.Details.Sum(d => d.Credit).ToString("N0") 원</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+}

@@ -1,0 +1,61 @@
+﻿@page
+@model MiniHR.Pages.Leave.ApplyModel
+@{
+    ViewData["Title"] = "연차 신청";
+}
+
+<h2>연차 신청</h2>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4">
+                        <p class="text-muted mb-1">총 연차</p>
+                        <h4 class="text-primary">@Model.TotalLeave 일</h4>
+                    </div>
+                    <div class="col-4">
+                        <p class="text-muted mb-1">사용</p>
+                        <h4 class="text-danger">@Model.UsedLeave 일</h4>
+                    </div>
+                    <div class="col-4">
+                        <p class="text-muted mb-1">잔여</p>
+                        <h4 class="text-success">@Model.RemainingLeave 일</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p class="mb-0">@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<form method="post" style="max-width: 500px;">
+    <div class="mb-3">
+        <label asp-for="LeaveLog.LeaveDate" class="form-label"></label>
+        <input asp-for="LeaveLog.LeaveDate" type="text" class="form-control"
+               value="@Model.LeaveLog.LeaveDate.ToString("yyyy-MM-dd")" placeholder="yyyy-MM-dd" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="LeaveLog.Type" class="form-label"></label>
+        <select asp-for="LeaveLog.Type"
+                asp-items="Html.GetEnumSelectList<MiniHR.Models.LeaveLog.LeaveType>()"
+                class="form-select"></select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="LeaveLog.Reason" class="form-label"></label>
+        <input asp-for="LeaveLog.Reason" class="form-control" placeholder="선택 입력" />
+    </div>
+    <button type="submit" class="btn btn-primary"
+            @(Model.RemainingLeave <= 0 ? "disabled" : "")>신청하기</button>
+    <a asp-page="./MyLeave" class="btn btn-outline-secondary ms-2">내 연차 내역 보기</a>
+</form>

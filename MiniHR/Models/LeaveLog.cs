@@ -33,9 +33,9 @@ namespace MiniHR.Models
 
         public enum LeaveType
         {
-            Annual,         // 연차 (1.0)
-            MorningHalf,    // 오전반차 (0.5)
-            AfternoonHalf   // 오후반차 (0.5)
+            [Display(Name = "연차")] Annual,
+            [Display(Name = "오전반차")] MorningHalf,
+            [Display(Name = "오후반차")] AfternoonHalf
         }
     }
 }
